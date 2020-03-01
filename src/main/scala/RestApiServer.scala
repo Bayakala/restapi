@@ -8,6 +8,7 @@ import pdi.jwt._
 import AuthBase._
 import MockUserAuthService._
 
+
 object RestApiServer extends App {
 
   implicit val httpSys = ActorSystem("httpSystem")
@@ -21,6 +22,27 @@ object RestApiServer extends App {
     .withSecretKey("OpenSesame")
     .withUserFunc(getValidUser)
 
+
+
+  import akka.http.scaladsl.model._
+  val cors = new CORSHandler {}
+  val route = cors.corsHandler(
+    pathSingleSlash {
+      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`,
+        "<html><body>Hello world!</body></html>"))
+    } ~
+      path("ping") {
+        complete("PONG!")
+      } ~
+      path("crash") {
+        sys.error("BOOM!")
+      }
+  )
+
+
+
+
+  /*
   val route =
     path("auth") {
       authenticateBasic(realm = "auth", authenticator.getUserInfo) { userinfo =>
@@ -41,7 +63,7 @@ object RestApiServer extends App {
             // ~ ...
           }
       }
-
+*/
   val (port, host) = (50081,"192.168.11.189")
 
   val bindingFuture = Http().bindAndHandle(route,host,port)
